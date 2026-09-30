@@ -11,7 +11,9 @@ passes it as a tie-flip only when the margin is tiny.
     python tools/parity_check.py --gguf models/pollock-mini-lm-125m-f32.gguf
 
 Requires `transformers`/`torch` on the HF side and a host build of llama.cpp
-with tools/greedy_probe (tools/build_llamacpp_host.bat / .sh).
+with tools/greedy_probe (tools/build_llamacpp_host.bat / .sh). The prompt goes
+to the probe over stdin on purpose: Windows argv is ANSI-coded and mangles
+Polish diacritics before llama.cpp ever sees them.
 """
 
 from __future__ import annotations
@@ -69,8 +71,8 @@ def hf_margin(model, seq: list[int], expected: int, got: int) -> float:
 
 def gguf_side(probe: Path, gguf: Path, prompt: str, n: int) -> tuple[list[int], list[int]]:
     res = subprocess.run(
-        [str(probe), str(gguf), prompt, str(n)],
-        capture_output=True, text=True, check=True,
+        [str(probe), str(gguf), str(n)],
+        input=prompt, capture_output=True, text=True, encoding="utf-8", check=True,
     )
     prompt_ids: list[int] = []
     gen_ids: list[int] = []
@@ -89,7 +91,10 @@ def main() -> int:
     ap.add_argument("--probe", type=Path,
                     default=ROOT / "vendor/llama.cpp/build-host/bin/greedy_probe.exe")
     ap.add_argument("--tokens", type=int, default=32)
+    ap.add_argument("--prompt", nargs="*", default=None,
+                    help="prompts to test (default: built-in EN set; pass PL ones for GoLLeM)")
     args = ap.parse_args()
+    prompts = args.prompt if args.prompt else PROMPTS
 
     for p in (args.gguf, args.probe):
         if not p.exists():
@@ -100,7 +105,7 @@ def main() -> int:
     failures = 0
     tie_flips = 0
 
-    for prompt in PROMPTS:
+    for prompt in prompts:
         hf_prompt, hf_gen = hf_generate(tok, model, prompt, args.tokens)
         gg_prompt, gg_gen = gguf_side(args.probe, args.gguf, prompt, args.tokens)
 
@@ -111,13 +116,17 @@ def main() -> int:
         else:
             k = next((i for i, (a, b) in enumerate(zip(hf_gen, gg_gen)) if a != b),
                      min(len(hf_gen), len(gg_gen)))
-            gap = hf_margin(model, hf_prompt + hf_gen[:k], hf_gen[k], gg_gen[k])
-            if abs(gap) < TIE_MARGIN:
-                gen_ok = True
-                tie_flips += 1
-                note = f" (tie-flip at token {k}: HF margin {gap:.4f} < {TIE_MARGIN})"
-            else:
+            if k >= len(hf_gen) or k >= len(gg_gen):
+                # one side stopped early (EOS) where the other kept going
                 gen_ok = False
+            else:
+                gap = hf_margin(model, hf_prompt + hf_gen[:k], hf_gen[k], gg_gen[k])
+                if abs(gap) < TIE_MARGIN:
+                    gen_ok = True
+                    tie_flips += 1
+                    note = f" (tie-flip at token {k}: HF margin {gap:.4f} < {TIE_MARGIN})"
+                else:
+                    gen_ok = False
 
         status = "OK  " if (tok_ok and gen_ok) else "FAIL"
         print(f"[{status}] {prompt!r}")
@@ -142,7 +151,7 @@ def main() -> int:
         extra = f" ({tie_flips} near-tie flip(s) within {TIE_MARGIN})" if tie_flips else ""
         print(f"PARITY OK{extra}")
     else:
-        print(f"{failures}/{len(PROMPTS)} prompts diverged")
+        print(f"{failures}/{len(prompts)} prompts diverged")
     return 0 if failures == 0 else 1
 
 

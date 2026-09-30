@@ -5,9 +5,20 @@ z watchOS na Androida (Wear OS 3+ i pełnoekranowe zegarki/androidowe telefony).
 Ten sam pomysł: **ilościowo mały model, w całości na urządzeniu, upstream
 llama.cpp**, tokeny na ekranie i statystyki benchmarku na żywo.
 
-Model: **[Pollock Mini LM 125M](https://huggingface.co/SlayerLab/pollock-mini-lm-125m)**
-z fabryka.ai (SlayerLab) — sub-128M model wytrenowany od zera, w sam raz na
-budżet RAM zegarka. Dlaczego on i jakie są alternatywy: [docs/MODEL.md](docs/MODEL.md).
+Modele (przełącznik w apce, wszystkie offline):
+
+| model | rozmiar | język | typ |
+|---|---|---|---|
+| **GoLLeM-110M-PL-SFT** (domyślny) | 73 MB Q4 | 🇵🇱 polski | instrukcyjny (SFT), GPT-2 |
+| Pollock Mini LM 125M Q4 | 88 MB | 🇬🇧 angielski | base, GPT-2 + SwiGLU (patch) |
+| Pollock Mini LM 125M Q8 | 135 MB | 🇬🇧 angielski | base, GPT-2 + SwiGLU (patch) |
+
+GoLLeM ([SlayerLab/goLLeM-110M-PL-SFT-merged](https://huggingface.co/SlayerLab/goLLeM-110M-PL-SFT-merged),
+CC-BY-SA-4.0) to mały polski model z fabryka.ai/SlayerLab — jedyna wersja
+odpowiadająca na pytania (SFT), nie tylko kontynuująca tekst. Pollock
+([SlayerLab/pollock-mini-lm-125m](https://huggingface.co/SlayerLab/pollock-mini-lm-125m))
+dokłada drugi punkt odniesienia (angielski, inna architektura MLP). Porównanie
+i uzasadnienie: [docs/MODEL.md](docs/MODEL.md).
 
 > Pollock to surowy model bazowy (kontynuacja tekstu, po angielsku), bez
 > instruction tuningu i alignmentu — patrz „Ograniczenia" w docs/MODEL.md.

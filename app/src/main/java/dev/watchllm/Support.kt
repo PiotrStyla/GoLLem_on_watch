@@ -5,11 +5,22 @@ package dev.watchllm
 import android.os.Debug
 import java.io.File
 
+/** How a raw user question is turned into model input. */
+enum class PromptFormat {
+    /** Pollock ships `|im_start|`/`|im_end|` markers - Qwen-style chat framing. */
+    IM_CHAT,
+
+    /** Plain continuation (GoLLeM cards demonstrate raw prompts; its SFT
+     *  training template is not public, so no invented framing). */
+    PLAIN,
+}
+
 data class ModelSpec(
     val id: String,
     val name: String,
     val file: String,
     val detail: String,
+    val format: PromptFormat,
     /** Pollock is a raw base model; a system turn only appears when a tool or the
      *  user config supplies one. */
     val systemPrompt: String? = null,
@@ -18,16 +29,25 @@ data class ModelSpec(
 object AppConfig {
     val models = listOf(
         ModelSpec(
+            id = "gollem-sft",
+            name = "GoLLeM 110M PL SFT",
+            file = "goLLeM-110M-PL-SFT-Q4_K_M.gguf",
+            detail = "GPT-2 - 110M PL, SFT - 73 MB",
+            format = PromptFormat.PLAIN,
+        ),
+        ModelSpec(
             id = "pollock-q4",
             name = "Pollock 125M Q4",
             file = "pollock-mini-lm-125m-Q4_K_M.gguf",
             detail = "GPT-2 + SwiGLU - 88 MB",
+            format = PromptFormat.IM_CHAT,
         ),
         ModelSpec(
             id = "pollock-q8",
             name = "Pollock 125M Q8",
             file = "pollock-mini-lm-125m-Q8_0.gguf",
             detail = "GPT-2 + SwiGLU - 135 MB",
+            format = PromptFormat.IM_CHAT,
         ),
     )
     val defaultModel = models.first()

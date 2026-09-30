@@ -159,26 +159,13 @@ Java_dev_watchllm_LlmEngine_nativeSetSampling(JNIEnv *, jobject, jboolean factua
 }
 
 JNIEXPORT jintArray JNICALL
-Java_dev_watchllm_LlmEngine_nativeTokenizeChat(JNIEnv * env, jobject,
-                                               jstring jprompt, jstring jcontext,
-                                               jstring jsystem) {
+Java_dev_watchllm_LlmEngine_nativeTokenizeChat(JNIEnv * env, jobject, jstring jtext) {
     jintArray empty = env->NewIntArray(0);
     if (!g_vocab) return empty;
 
-    const std::string marker_sys  = tok_marker("|im_start|");
-    const std::string marker_end  = tok_marker("|im_end|");
-
-    std::string text;
-    const std::string context = jstr(env, jcontext);
-    const std::string system  = jstr(env, jsystem);
-    if (!context.empty() || !system.empty()) {
-        text += marker_sys + "system\n";
-        if (!context.empty()) text += context + " ";
-        text += system;
-        text += marker_end + "\n";
-    }
-    text += marker_sys + "user\n" + jstr(env, jprompt) + marker_end + "\n";
-    text += marker_sys + "assistant\n";
+    // Prompt formatting lives in Kotlin (per-model templates); the engine just
+    // tokenizes, keeping special tokens parseable.
+    const std::string text = jstr(env, jtext);
 
     std::vector<llama_token> toks(text.size() + 16);
     const int32_t n = llama_tokenize(g_vocab, text.c_str(), (int32_t)text.size(),

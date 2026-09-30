@@ -5,7 +5,27 @@ całkowicie offline. Ograniczenia sprzętowe zegarka (1–1,5 GB RAM, CPU
 2–4 małe rdzenie, ~250–400 MB realnego budżetu na proces) odsiewają wszystko
 powyżej ~200M parametrów.
 
-## Kandydaci z ekosystemu fabryka.ai
+## Rodzina GoLLeM (fabryka.ai / SlayerLab) — model domyślny
+
+GoLLeM to seria małych **polskich** modeli SlayerLab (autorki/autorzy: Arkadiusz
+Słota, KateMajzel), z publicznymi wagami na HF:
+
+| model | param. | architektura | ctx | licencja | charakter |
+|---|---|---|---|---|---|
+| **goLLeM-110M-PL-SFT-merged** | 110M | GPT-2 12×12×768 (GELU) | 512 | CC-BY-SA-4.0 | **SFT** — odpowiada, 100% PL |
+| GoLLeM-110M-PL-v3 | 110M | jw. | 512 | CC-BY-SA-4.0 | base/completion PL |
+| GoLLeM-45M-PL | 42.5M | GPT-2 8×8×512 | 1024 | MIT | ablcja tokenizera PL (KateMajzel) |
+| gollem-v4-250m-pl | 250M | custom loader | 1024 | research-only | base PL + trajektoria ckptów |
+| gollem-v5-ckpts | tiny | nanoGPT | — | Apache-2.0 | angielski; kampania pomiarowa |
+
+Wybrany **goLLeM-110M-PL-SFT-merged**: klasa wag jak Pollock (~110M), ale
+polski i instrukcyjny; standardowy GPT-2 = działa bez patcha llama.cpp
+(tokenizer: polski byte-level BPE dynaword-32k, pretokenizacja regexem GPT-2).
+Uwaga: publicznie nie opublikowano szablonu promptu zbioru SFT — aplikacja nie
+zmyśla formatu, używa zwykłej kontynuacji (PLAIN) zgodnie z kartą modelu.
+Słabszy transfer EN, kontekst 512 (KV cache tym mniejszy — ~25 MB @ 512).
+
+## Kandydaci spoza GoLLeM
 
 | model | parametry | dostępne wagi | decyzja |
 |---|---|---|---|

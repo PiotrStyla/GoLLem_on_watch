@@ -2,23 +2,28 @@
 // and prints the greedy continuation as token ids. tools/parity_check.py diffs
 // these against HuggingFace `generate(do_sample=False)` on the same prompt.
 //
-//   greedy_probe <model.gguf> <prompt> [max_tokens]
+//   greedy_probe <model.gguf> [max_tokens]   (prompt on stdin, UTF-8)
 
 #include <cstdio>
 #include <cstdlib>
+#include <iostream>
 #include <string>
 #include <vector>
 
 #include "llama.h"
 
 int main(int argc, char ** argv) {
-    if (argc < 3) {
-        fprintf(stderr, "usage: %s <model.gguf> <prompt> [max_tokens]\n", argv[0]);
+    if (argc < 2) {
+        fprintf(stderr, "usage: %s <model.gguf> [max_tokens]  < prompt.txt\n", argv[0]);
         return 2;
     }
-    const char * path  = argv[1];
-    const char * prompt = argv[2];
-    const int    n_gen = argc > 3 ? atoi(argv[3]) : 32;
+    const char * path = argv[1];
+    const int    n_gen = argc > 2 ? atoi(argv[2]) : 32;
+
+    // The prompt arrives on stdin, not argv: Windows argv goes through the ANSI
+    // codepage and mangles non-ASCII (Polish diacritics) before we ever see it.
+    std::string prompt;
+    std::getline(std::cin, prompt);
 
     llama_backend_init();
 
@@ -41,8 +46,8 @@ int main(int argc, char ** argv) {
     }
     const llama_vocab * vocab = llama_model_get_vocab(model);
 
-    std::vector<llama_token> toks(strlen(prompt) + 16);
-    const int32_t n = llama_tokenize(vocab, prompt, (int32_t)strlen(prompt),
+    std::vector<llama_token> toks(prompt.size() + 16);
+    const int32_t n = llama_tokenize(vocab, prompt.c_str(), (int32_t)prompt.size(),
                                      toks.data(), (int32_t)toks.size(), false, true);
     if (n <= 0) {
         fprintf(stderr, "tokenization failed\n");
@@ -68,8 +73,9 @@ int main(int argc, char ** argv) {
     printf("GEN_TOKENS");
     llama_token cur = llama_sampler_sample(sampler, ctx, -1);
     for (int i = 0; i < n_gen; ++i) {
-        if (llama_vocab_is_eog(vocab, cur)) break;
+        // Print first: HF `generate` includes the terminal EOS id in its output.
         printf(" %d", cur);
+        if (llama_vocab_is_eog(vocab, cur)) break;
         llama_token t = cur;
         llama_batch batch = llama_batch_get_one(&t, 1);
         if (llama_decode(ctx, batch) != 0) break;

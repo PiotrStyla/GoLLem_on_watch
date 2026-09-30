@@ -44,5 +44,22 @@ if (-not (Test-Path $Quant)) {
 & $Quant models/pollock-mini-lm-125m-f16.gguf models/bundled/pollock-mini-lm-125m-Q4_K_M.gguf Q4_K_M
 & $Quant models/pollock-mini-lm-125m-f16.gguf models/bundled/pollock-mini-lm-125m-Q8_0.gguf  Q8_0
 
+# GoLLeM-110M-PL-SFT (Polish, instruction-tuned; plain GPT-2 - no patch needed)
+$GollemDir = "models/gollem-sft"
+$GollemHf = "SlayerLab/goLLeM-110M-PL-SFT-merged"
+if (-not (Test-Path "$GollemDir/model.safetensors")) {
+    New-Item -ItemType Directory -Force -Path $GollemDir | Out-Null
+    foreach ($File in @("model.safetensors", "tokenizer.json", "config.json", "tokenizer_config.json")) {
+        if (Test-Path "$GollemDir/$File") { continue }
+        Write-Host "Downloading GoLLeM $File ..."
+        curl.exe -fL --progress-bar -o "$GollemDir/$File" "https://huggingface.co/$GollemHf/resolve/main/$File"
+    }
+}
+if (-not (Test-Path "models/goLLeM-110M-PL-SFT-f16.gguf")) {
+    python tools/convert_gollem_to_gguf.py $GollemDir `
+        --outfile models/goLLeM-110M-PL-SFT-f16.gguf --outtype f16
+}
+& $Quant models/goLLeM-110M-PL-SFT-f16.gguf models/bundled/goLLeM-110M-PL-SFT-Q4_K_M.gguf Q4_K_M
+
 Write-Host ""
 Write-Host "Models ready in models/bundled/. Next: build the app (see README)."

@@ -150,7 +150,7 @@ class LlmRunner(private val context: Context, private val autorun: Boolean = fal
         engine.nativeReset()
         engine.nativeSetSampling(context != null)
 
-        val toks = engine.nativeTokenizeChat(prompt, context, _ui.value.model.systemPrompt)
+        val toks = engine.nativeTokenizeChat(buildPrompt(prompt, context))
         if (toks.isEmpty()) {
             _ui.value = _ui.value.copy(state = State.FAILED, error = "prompt produced no tokens")
             return
@@ -193,6 +193,32 @@ class LlmRunner(private val context: Context, private val autorun: Boolean = fal
             } else {
                 parked = null
                 runLoop(run)
+            }
+        }
+    }
+
+    /** Formats the user question (and optional tool fact) for the loaded model.
+     *  Pollock: Qwen-style markers it was tokenized with; GoLLeM: plain
+     *  continuation (its SFT template is not public - do not invent one). */
+    private fun buildPrompt(prompt: String, context: String?): String {
+        val spec = _ui.value.model
+        return when (spec.format) {
+            dev.watchllm.PromptFormat.IM_CHAT -> {
+                val start = "<" + "|im_start|" + ">"
+                val end = "<" + "|im_end|" + ">"
+                buildString {
+                    if (context != null || spec.systemPrompt != null) {
+                        append(start).append("system\n")
+                        if (context != null) append(context).append(' ')
+                        append(spec.systemPrompt.orEmpty()).append(end).append('\n')
+                    }
+                    append(start).append("user\n").append(prompt).append(end).append('\n')
+                    append(start).append("assistant\n")
+                }
+            }
+            dev.watchllm.PromptFormat.PLAIN -> buildString {
+                if (context != null) append(context).append("\n\n")
+                append(prompt)
             }
         }
     }

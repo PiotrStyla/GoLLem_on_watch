@@ -8,7 +8,8 @@ class LlmEngine {
     external fun nativeUnload()
     external fun nativeReset()
     external fun nativeSetSampling(factual: Boolean)
-    external fun nativeTokenizeChat(prompt: String, context: String?, system: String?): IntArray
+    /** Tokenizes an already-formatted prompt (special tokens parsed). */
+    external fun nativeTokenizeChat(text: String): IntArray
     /** Batched prompt eval; returns the first sampled token or -1. */
     external fun nativePrompt(tokens: IntArray): Int
     external fun nativeStep(token: Int): Int

@@ -48,5 +48,20 @@ fi
 "$QUANT" models/pollock-mini-lm-125m-f16.gguf models/bundled/pollock-mini-lm-125m-Q4_K_M.gguf Q4_K_M
 "$QUANT" models/pollock-mini-lm-125m-f16.gguf models/bundled/pollock-mini-lm-125m-Q8_0.gguf  Q8_0
 
+# GoLLeM-110M-PL-SFT (Polish, instruction-tuned; plain GPT-2 - no patch needed)
+GOLLEM_DIR=models/gollem-sft
+GOLLEM_HF=SlayerLab/goLLeM-110M-PL-SFT-merged
+mkdir -p "$GOLLEM_DIR"
+for FILE in model.safetensors tokenizer.json config.json tokenizer_config.json; do
+  [ -f "$GOLLEM_DIR/$FILE" ] && continue
+  echo "Downloading GoLLeM $FILE ..."
+  curl -fL --progress-bar -o "$GOLLEM_DIR/$FILE" "https://huggingface.co/$GOLLEM_HF/resolve/main/$FILE"
+done
+if [ ! -f models/goLLeM-110M-PL-SFT-f16.gguf ]; then
+  python tools/convert_gollem_to_gguf.py "$GOLLEM_DIR" \
+    --outfile models/goLLeM-110M-PL-SFT-f16.gguf --outtype f16
+fi
+"$QUANT" models/goLLeM-110M-PL-SFT-f16.gguf models/bundled/goLLeM-110M-PL-SFT-Q4_K_M.gguf Q4_K_M
+
 echo
 echo "Models ready in models/bundled/. Next: build the app (see README)."
