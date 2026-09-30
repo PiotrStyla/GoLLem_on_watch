@@ -23,6 +23,14 @@ i uzasadnienie: [docs/MODEL.md](docs/MODEL.md).
 > Pollock to surowy model bazowy (kontynuacja tekstu, po angielsku), bez
 > instruction tuningu i alignmentu — patrz „Ograniczenia" w docs/MODEL.md.
 
+Uwagi i propozycje treningu dla modeli SlayerLab/fabryka.ai z pracy przy tym
+porcie: [docs/MODEL_REVIEW.md](docs/MODEL_REVIEW.md).
+
+<p align="center">
+  <img src="docs/img/watch-run.png" width="240"
+       alt="Galaxy Watch4 Classic generuje tekst na żywo z panelami statystyk">
+</p>
+
 ## Jak to zbudowane
 
 ```
