@@ -67,9 +67,15 @@ python tools\parity_check.py --gguf models\pollock-mini-lm-125m-f32.gguf
 # 4. APK
 gradlew assembleDebug          # app\build\outputs\apk\debug\app-debug.apk
 
-# 5. wgranie na zegarek (Wear OS: przez adb po USB/Wi-Fi z parowania debug)
-adb install -r app\build\outputs\apk\debug\app-debug.apk
+# 5. wgranie na zegarek (Wear OS: adb przez Wi-Fi)
+powershell -ExecutionPolicy Bypass -File tools\install_watch.ps1 pair    192.168.0.23:37123   # kod sparowania z ekranu zegarka
+powershell -ExecutionPolicy Bypass -File tools\install_watch.ps1 install 192.168.0.23:37123   # instalacja + auto-bench z logatami
 ```
+
+Wymagania na zegarku: Opcje programisty (5× stuknąć w „Numer kompilacji") →
+WŁ. „Debugowanie ADB" + WŁ. „Debugowanie przez Wi-Fi" — zegarek pokaże adresy
+do sparowania i połączenia. Bluetooth nie wystarcza (Wear OS 3 nie przenosi
+adb po BT).
 
 Nie masz `gradle`? Wygeneruj wrapper raz: `gradle wrapper --gradle-version 8.10.2`
 albo otwórz projekt w Android Studio i zbuduj stamtąd.
