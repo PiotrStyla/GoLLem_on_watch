@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class LlmRunner(private val context: Context, private val autorun: Boolean = false) {
+class LlmRunner(private val context: Context, private val autorunPrompt: String? = null) {
 
     enum class State { IDLE, LOADING, READY, GENERATING, PARKED, FAILED }
 
@@ -97,9 +97,10 @@ class LlmRunner(private val context: Context, private val autorun: Boolean = fal
                     stats = _ui.value.stats.copy(weightsMB = w, contextMB = c, threads = t),
                 )
                 Log.i(TAG, "loaded: weights=${"%.1f".format(w)} MB ctx=${"%.1f".format(c)} MB threads=$t")
-                // FH1_AUTORUN equivalent: generate the bench prompt on launch
-                // for repeatable measurement runs (`adb shell am start ... --ez bench true`).
-                if (autorun) generate(AppConfig.benchPrompt)
+                // FH1_AUTORUN equivalent: generate on launch for repeatable
+                // measurement runs (`adb shell am start ... --ez bench true`
+                // or `--es prompt "..."`).
+                autorunPrompt?.let { generate(it) }
             } catch (e: Exception) {
                 _ui.value = _ui.value.copy(state = State.FAILED, error = e.message ?: "load failed")
             }
@@ -310,6 +311,7 @@ class LlmRunner(private val context: Context, private val autorun: Boolean = fal
             "ttft=${"%.3f".format(s.timeToFirstTokenS)}s gen=${s.generatedTokens} " +
             "prompt=${s.promptTokens} peak=${"%.1f".format(s.peakFootprintMB)}MB " +
             "threads=${s.threads}")
+        Log.i(TAG, "OUTPUT ${_ui.value.output.take(600)}")
     }
 
     fun close() {

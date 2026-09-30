@@ -18,7 +18,9 @@ class MainActivity : ComponentActivity() {
         // process (D-state) the moment the display sleeps (verified on SM-R865F).
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         ToolBox.init(applicationContext)
-        runner = LlmRunner(applicationContext, intent.getBooleanExtra("bench", false))
+        val prompt = intent.getStringExtra("prompt")
+            ?: if (intent.getBooleanExtra("bench", false)) dev.watchllm.AppConfig.benchPrompt else null
+        runner = LlmRunner(applicationContext, prompt)
         setContent { WatchLLMApp(runner) }
         runner.load()
     }

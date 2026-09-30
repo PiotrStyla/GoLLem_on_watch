@@ -12,3 +12,4 @@ local.properties
 
 # tool config with user data; the example is committed
 app/src/main/assets/Tools.json
+.kotlin/
