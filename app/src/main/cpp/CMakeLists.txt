@@ -13,6 +13,13 @@ set(LLAMA_BUILD_TOOLS    OFF CACHE BOOL "" FORCE)
 # cross-compilation (same class of bug as the watchOS scalar-kernel fallback).
 set(GGML_NATIVE OFF CACHE BOOL "" FORCE)
 
+# llamafile sgemm calls fp16 NEON intrinsics that do not exist on 32-bit ARM
+# (upstream FIXME in ggml-cpu/llamafile/sgemm.cpp). Galaxy Watch4 runs a 32-bit
+# userspace, so for armeabi-v7a we fall back to ggml's standard mul_mat path.
+if (ANDROID_ABI STREQUAL "armeabi-v7a")
+    set(GGML_LLAMAFILE OFF CACHE BOOL "" FORCE)
+endif()
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../../../vendor/llama.cpp llama.cpp)
 
 add_library(watchllm SHARED llm_jni.cpp)

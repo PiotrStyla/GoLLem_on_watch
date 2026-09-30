@@ -16,12 +16,11 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        // arm64-v8a: Wear OS 3+ watches (Galaxy Watch 4+, Pixel Watch) and
-        // modern full-Android watches; x86_64: emulator. 32-bit ARM is dropped
-        // on purpose: upstream ggml's sgemm uses fp16 intrinsics unavailable on
-        // armv7, and the target watches are all 64-bit.
+        // arm64-v8a: 64-bit watches/phones; armeabi-v7a: Galaxy Watch4/5 class
+        // (Exynos W920: 64-bit CPU, 32-bit Wear OS userspace - SM-R865F verified);
+        // x86_64: emulator.
         ndk {
-            abiFilters += listOf("arm64-v8a", "x86_64")
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
         }
 
         externalNativeBuild {

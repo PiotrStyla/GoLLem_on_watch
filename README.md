@@ -126,8 +126,10 @@ zmyśloną arytmetyką.
 
 ## Ograniczenia
 
-- Wymagany **64-bitowy SoC** (arm64-v8a) — czyli każdy Wear OS 3+ i nowsze
-  zegarki pełnoandroidowe; 32-bit ARM nie jest wspierany (patrz app/build.gradle.kts).
+- Obsługiwane ABI: **armeabi-v7a** (Galaxy Watch4/5 — 32-bit Wear OS mimo
+  64-bit CPU), **arm64-v8a** i x86_64. Dla 32-bit build ładowany jest
+  `GGML_LLAMAFILE=OFF` (upstream sgemm używa intrinsicsów fp16 nieobecnych na
+  armv7 — patrz app/src/main/cpp/CMakeLists.txt).
 - Pollock to model **bazowy po angielsku** — to kontynuacja tekstu, nie
   asystent; jakość odpowiedzi jest klasy „mały model", nie ChatGPT.
 - Model jest eksperymentalny (licencja: mixed upstream dataset terms) — czytaj

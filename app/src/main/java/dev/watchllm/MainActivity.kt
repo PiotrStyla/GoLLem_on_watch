@@ -14,6 +14,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Streaming text is read off the screen; also avoids One UI freezing the
+        // process (D-state) the moment the display sleeps (verified on SM-R865F).
+        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         ToolBox.init(applicationContext)
         runner = LlmRunner(applicationContext, intent.getBooleanExtra("bench", false))
         setContent { WatchLLMApp(runner) }

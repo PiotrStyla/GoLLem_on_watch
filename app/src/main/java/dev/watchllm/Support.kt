@@ -115,21 +115,17 @@ class Utf8Stream {
     }
 }
 
-/** Resolves a model file: external dir first (adb push), then internal, then a
- *  copy of the bundled asset. */
+/** Resolves a model file: a previously extracted copy in internal storage,
+ *  else a streamed copy of the bundled asset. Internal only on purpose:
+ *  `getExternalFilesDir` can hang in D-state on Wear OS FUSE storage when the
+ *  screen is off (verified on SM-R865F). */
 fun resolveModelFile(context: android.content.Context, spec: ModelSpec): File {
-    val candidates = listOf(
-        File(context.getExternalFilesDir(null), "models/${spec.file}"),
-        File(context.filesDir, "models/${spec.file}"),
-    )
-    candidates.firstOrNull { it.exists() }?.let { return it }
+    val out = File(context.filesDir, "models/${spec.file}")
+    if (out.exists()) return out
 
-    // models/bundled/ is an assets root dir, so files sit at the asset root.
-    val assetPath = spec.file
-    val out = candidates[1]
     out.parentFile?.mkdirs()
     try {
-        context.assets.open(assetPath).use { input ->
+        context.assets.open(spec.file).use { input ->
             out.outputStream().use { output -> input.copyTo(output) }
         }
     } catch (e: Exception) {

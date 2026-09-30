@@ -79,7 +79,9 @@ class LlmRunner(private val context: Context, private val autorun: Boolean = fal
         _ui.value = _ui.value.copy(state = State.LOADING, error = null, output = "", toolNote = null)
         scope.launch {
             try {
+                Log.i(TAG, "resolving model ${spec.file}")
                 val file = resolveModelFile(context, spec)
+                Log.i(TAG, "model at ${file.absolutePath} (${file.length() / 1000000} MB)")
                 // Watch SoCs are dual/quad-core little parts; more threads than
                 // cores just adds contention.
                 val threads = max(1, minOf(2, Runtime.getRuntime().availableProcessors()))
