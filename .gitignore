@@ -1,0 +1,14 @@
+# model artifacts (hundreds of MB - fetch with tools/fetch_model.sh)
+models/
+!models/.gitkeep
+vendor/
+.toolchain/
+.gradle/
+build/
+.cxx/
+local.properties
+*.iml
+.idea/
+
+# tool config with user data; the example is committed
+app/src/main/assets/Tools.json

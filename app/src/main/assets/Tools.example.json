@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Weather",
+    "triggers": ["weather", "pogoda"],
+    "url": "https://api.open-meteo.com/v1/forecast?latitude=52.2297&longitude=21.0122&current=temperature_2m,wind_speed_10m",
+    "windowDays": null,
+    "maxChars": null,
+    "headers": null,
+    "fields": {
+      "temp": ["current", "temperature_2m"],
+      "wind": ["current", "wind_speed_10m"]
+    },
+    "derived": null,
+    "factTemplate": "Current weather in Warsaw: {temp} C, wind {wind} km/h."
+  },
+  {
+    "name": "Bitcoin",
+    "triggers": ["bitcoin", "btc"],
+    "url": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
+    "fields": {
+      "price": ["bitcoin", "usd"]
+    },
+    "factTemplate": "Bitcoin is trading at {price} US dollars right now."
+  },
+  {
+    "name": "USD-EUR",
+    "triggers": ["dollar", "euro", "usd", "eur"],
+    "url": "https://api.frankfurter.app/latest?from=USD&to=EUR",
+    "fields": {
+      "rate": ["rates", "EUR"]
+    },
+    "factTemplate": "One US dollar buys {rate} euros today."
+  },
+  {
+    "name": "Wikipedia",
+    "triggers": ["who is", "what is", "kim jest", "co to"],
+    "url": "https://en.wikipedia.org/api/rest_v1/page/summary/{query}",
+    "maxChars": 240,
+    "jsonPath": ["extract"],
+    "factTemplate": "Wikipedia says: {value}"
+  }
+]
