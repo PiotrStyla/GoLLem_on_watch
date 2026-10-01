@@ -24,7 +24,9 @@ i uzasadnienie: [docs/MODEL.md](docs/MODEL.md).
 > instruction tuningu i alignmentu — patrz „Ograniczenia" w docs/MODEL.md.
 
 Uwagi i propozycje treningu dla modeli SlayerLab/fabryka.ai z pracy przy tym
-porcie: [docs/MODEL_REVIEW.md](docs/MODEL_REVIEW.md).
+porcie: [docs/MODEL_REVIEW.md](docs/MODEL_REVIEW.md) (diagnoza) oraz
+[docs/TUNING_RECOMMENDATIONS.md](docs/TUNING_RECOMMENDATIONS.md) (receptury
+tuningowe dla budowniczego modelu).
 
 <p align="center">
   <img src="docs/img/watch-run.png" width="240"
